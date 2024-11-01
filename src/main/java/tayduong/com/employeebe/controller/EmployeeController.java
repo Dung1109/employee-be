@@ -1,9 +1,7 @@
 package tayduong.com.employeebe.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import tayduong.com.employeebe.dto.EmployeeDto;
 import tayduong.com.employeebe.mapper.EmployeeMapper;
 import tayduong.com.employeebe.repo.EmployeeRepository;
@@ -11,6 +9,8 @@ import tayduong.com.employeebe.repo.EmployeeRepository;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/v1/employee")
+@CrossOrigin(origins = "http://localhost:3000")
 public class EmployeeController {
     private final EmployeeMapper employeeMapper;
     private final EmployeeRepository employeeRepository;
@@ -31,5 +31,10 @@ public class EmployeeController {
         return employeeRepository.findByEmployeeId(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<List<EmployeeDto>> getAllEmployees() {
+        return ResponseEntity.ok(employeeMapper.toDto(employeeRepository.findAll()));
     }
 }
