@@ -1,12 +1,18 @@
 package tayduong.com.employeebe.controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tayduong.com.employeebe.dto.EmployeeDto;
 import tayduong.com.employeebe.mapper.EmployeeMapper;
 import tayduong.com.employeebe.repo.EmployeeRepository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/employee")
@@ -34,7 +40,22 @@ public class EmployeeController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<List<EmployeeDto>> getAllEmployees() {
-        return ResponseEntity.ok(employeeMapper.toDto(employeeRepository.findAll()));
+    public ResponseEntity<Map<String, Object>> getEmployee(
+            @RequestParam(defaultValue = "0") Integer pageNo,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(defaultValue = "id") String sortBy
+    ) {
+
+        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+        Page<EmployeeDto> pagedResult = employeeRepository.findAllEmployeesWithPagination(paging);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("employees", pagedResult.getContent());
+        response.put("currentPage", pagedResult.getNumber());
+        response.put("totalItems", pagedResult.getTotalElements());
+        response.put("totalPages", pagedResult.getTotalPages());
+        response.put("currentSort", sortBy);
+
+        return ResponseEntity.ok(response);
     }
 }
