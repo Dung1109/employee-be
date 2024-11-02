@@ -58,4 +58,10 @@ public class EmployeeController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/")
+    public ResponseEntity<EmployeeDto> createEmployee(@RequestBody EmployeeDto employeeDto) {
+//        accountRepository
+        return ResponseEntity.ok(employeeMapper.toDto(employeeRepository.save(employeeMapper.toEntity(employeeDto))));
+    }
 }

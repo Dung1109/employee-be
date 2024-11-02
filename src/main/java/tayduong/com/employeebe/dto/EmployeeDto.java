@@ -1,5 +1,6 @@
 package tayduong.com.employeebe.dto;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.Value;
