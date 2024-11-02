@@ -1,8 +1,7 @@
 package tayduong.com.employeebe.dto;
 
-import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 import lombok.Value;
 import tayduong.com.employeebe.entities.Employee;
 import tayduong.com.employeebe.enums.Gender;
@@ -29,4 +28,8 @@ public class EmployeeDto implements Serializable {
     String remark;
     String account;
     Status status;
+
+    @Email
+    String email;
+    String password;
 }

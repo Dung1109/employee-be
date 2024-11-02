@@ -11,9 +11,9 @@ import java.util.Optional;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
 
-    @Query("SELECT new tayduong.com.employeebe.dto.EmployeeDto(e.id, e.firstName, e.lastName, e.gender, e.dateOfBirth, e.phone, e.address, e.departmentName, e.remark, a.account, a.status) FROM Employee e JOIN Account a ON e.id = a.employee.id WHERE e.id = :id")
+    @Query("SELECT new tayduong.com.employeebe.dto.EmployeeDto(e.id, e.firstName, e.lastName, e.gender, e.dateOfBirth, e.phone, e.address, e.departmentName, e.remark, a.account, a.status, a.email, a.password) FROM Employee e LEFT JOIN Account a ON e.id = a.employee.id WHERE e.id = :id")
     Optional<EmployeeDto> findByEmployeeId(Integer id);
 
-    @Query("SELECT new tayduong.com.employeebe.dto.EmployeeDto(e.id, e.firstName, e.lastName, e.gender, e.dateOfBirth, e.phone, e.address, e.departmentName, e.remark, null, null ) FROM Employee e ")
+    @Query("SELECT new tayduong.com.employeebe.dto.EmployeeDto(e.id, e.firstName, e.lastName, e.gender, e.dateOfBirth, e.phone, e.address, e.departmentName, e.remark, null, null, null , null ) FROM Employee e ")
     Page<EmployeeDto> findAllEmployeesWithPagination(Pageable pageable);
 }

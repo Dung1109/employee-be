@@ -7,7 +7,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tayduong.com.employeebe.dto.EmployeeDto;
+import tayduong.com.employeebe.entities.Account;
+import tayduong.com.employeebe.entities.Employee;
 import tayduong.com.employeebe.mapper.EmployeeMapper;
+import tayduong.com.employeebe.repo.AccountRepository;
 import tayduong.com.employeebe.repo.EmployeeRepository;
 
 import java.util.HashMap;
@@ -20,11 +23,13 @@ import java.util.Map;
 public class EmployeeController {
     private final EmployeeMapper employeeMapper;
     private final EmployeeRepository employeeRepository;
+    private final AccountRepository accountRepository;
 
-    public EmployeeController(EmployeeMapper employeeMapper, EmployeeRepository employeeRepository
-    ) {
+    public EmployeeController(EmployeeMapper employeeMapper, EmployeeRepository employeeRepository,
+                              AccountRepository accountRepository) {
         this.employeeMapper = employeeMapper;
         this.employeeRepository = employeeRepository;
+        this.accountRepository = accountRepository;
     }
 
     @GetMapping("/test/employee")
@@ -32,7 +37,7 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeMapper.toDto(employeeRepository.findAll()));
     }
 
-    @GetMapping("/test/employee/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable Integer id) {
         return employeeRepository.findByEmployeeId(id)
                 .map(ResponseEntity::ok)
@@ -61,7 +66,33 @@ public class EmployeeController {
 
     @PostMapping("/")
     public ResponseEntity<EmployeeDto> createEmployee(@RequestBody EmployeeDto employeeDto) {
-//        accountRepository
-        return ResponseEntity.ok(employeeMapper.toDto(employeeRepository.save(employeeMapper.toEntity(employeeDto))));
+        Employee employee = employeeRepository.save(employeeMapper.toEntity(employeeDto));
+        Account account = accountRepository.save(Account.builder()
+                .account(employeeDto.getAccount())
+                .email(employeeDto.getEmail())
+                .password(employeeDto.getPassword())
+                .status(employeeDto.getStatus())
+                .employee(employee)
+                .build());
+
+        return ResponseEntity.ok(employeeDto);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EmployeeDto> updateEmployee(@PathVariable Integer id, @RequestBody EmployeeDto employeeDto) {
+        Employee employee = employeeMapper.toEntity(employeeDto);
+        employee.setId(id);
+
+        Account account = accountRepository.findByEmployeeId(id);
+
+        account.setAccount(employeeDto.getAccount());
+        account.setEmail(employeeDto.getEmail());
+        account.setPassword(employeeDto.getPassword());
+        account.setStatus(employeeDto.getStatus());
+
+        accountRepository.save(account);
+        Employee save = employeeRepository.save(employee);
+
+        return ResponseEntity.ok(employeeMapper.toDto(save));
     }
 }
