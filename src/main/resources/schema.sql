@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS account;
 DROP TABLE IF EXISTS employee;
+DROP TABLE IF EXISTS images;
 
 CREATE TABLE account
 (
