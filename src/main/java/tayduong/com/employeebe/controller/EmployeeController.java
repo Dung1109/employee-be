@@ -6,12 +6,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import tayduong.com.employeebe.dto.EmployeeDto;
 import tayduong.com.employeebe.entities.Account;
 import tayduong.com.employeebe.entities.Employee;
+import tayduong.com.employeebe.entities.Image;
 import tayduong.com.employeebe.mapper.EmployeeMapper;
 import tayduong.com.employeebe.repo.AccountRepository;
 import tayduong.com.employeebe.repo.EmployeeRepository;
+import tayduong.com.employeebe.service.ImageService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,12 +27,14 @@ public class EmployeeController {
     private final EmployeeMapper employeeMapper;
     private final EmployeeRepository employeeRepository;
     private final AccountRepository accountRepository;
+    private final ImageService imageService;
 
     public EmployeeController(EmployeeMapper employeeMapper, EmployeeRepository employeeRepository,
-                              AccountRepository accountRepository) {
+                              AccountRepository accountRepository, ImageService imageService) {
         this.employeeMapper = employeeMapper;
         this.employeeRepository = employeeRepository;
         this.accountRepository = accountRepository;
+        this.imageService = imageService;
     }
 
     @GetMapping("/test/employee")
@@ -94,5 +99,17 @@ public class EmployeeController {
         Employee save = employeeRepository.save(employee);
 
         return ResponseEntity.ok(employeeMapper.toDto(save));
+    }
+
+    @PostMapping("/image/upload")
+    public ResponseEntity<Image> uploadImage(@RequestParam("file") MultipartFile file, @RequestParam("userId") String userId) {
+        Image image = imageService.uploadImage(file, userId);
+        return ResponseEntity.ok(image);
+    }
+
+    @GetMapping("/image/{userId}")
+    public ResponseEntity<List<Image>> getUserImages(@PathVariable String userId) {
+        List<Image> images = imageService.getUserImages(userId);
+        return ResponseEntity.ok(images);
     }
 }
