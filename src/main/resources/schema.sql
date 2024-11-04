@@ -49,3 +49,6 @@ CREATE TABLE images
     upload_date TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT pk_images PRIMARY KEY (id)
 );
+
+ALTER TABLE account
+    ADD role VARCHAR(255) DEFAULT 'USER';

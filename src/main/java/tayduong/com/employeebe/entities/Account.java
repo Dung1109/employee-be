@@ -2,6 +2,7 @@ package tayduong.com.employeebe.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.userdetails.UserDetails;
 import tayduong.com.employeebe.enums.Status;
 
 @Getter
@@ -11,7 +12,7 @@ import tayduong.com.employeebe.enums.Status;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Account {
+public class Account  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -34,4 +35,5 @@ public class Account {
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
+    private String role = "USER";
 }
