@@ -59,3 +59,4 @@ VALUES
     ('rita.c', 'rita.coral@example.com', 'rita123', 1, 20),
     ('sam.m', 'sam.magenta@example.com', 'sam123', 0, 21),
     ('tina.v', 'tina.violet@example.com', 'tina123', 1, 22);
+
