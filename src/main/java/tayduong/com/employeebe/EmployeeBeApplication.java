@@ -24,7 +24,7 @@ public class EmployeeBeApplication {
     CommandLineRunner init(AccountRepository accountRepository, EmployeeRepository employeeRepository, PasswordEncoder passwordEncoder) {
         return (args) -> {
             Employee emp = employeeRepository.save(Employee.builder().firstName("tayduong").lastName("tayduong").address("HN").remark("ADASD").build());
-            accountRepository.save(Account.builder().account("admin123").password(passwordEncoder.encode("123")).status(Status.ACTIVE).role("USER").employee(emp).build());
+            accountRepository.save(Account.builder().account("admin123").password(passwordEncoder.encode("123456")).status(Status.ACTIVE).role("USER").employee(emp).build());
         };
     }
 

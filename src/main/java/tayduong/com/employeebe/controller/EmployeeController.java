@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tayduong.com.employeebe.dto.AccountCredentials;
@@ -36,15 +37,17 @@ public class EmployeeController {
     private final ImageService imageService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
 
     public EmployeeController(EmployeeMapper employeeMapper, EmployeeRepository employeeRepository,
-                              AccountRepository accountRepository, ImageService imageService, AuthenticationManager authenticationManager, JwtService jwtService) {
+                              AccountRepository accountRepository, ImageService imageService, AuthenticationManager authenticationManager, JwtService jwtService, PasswordEncoder passwordEncoder) {
         this.employeeMapper = employeeMapper;
         this.employeeRepository = employeeRepository;
         this.accountRepository = accountRepository;
         this.imageService = imageService;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/test/employee")
@@ -85,9 +88,10 @@ public class EmployeeController {
         Account account = accountRepository.save(Account.builder()
                 .account(employeeDto.getAccount())
                 .email(employeeDto.getEmail())
-                .password(employeeDto.getPassword())
+                .password(passwordEncoder.encode(employeeDto.getPassword()))
                 .status(employeeDto.getStatus())
                 .employee(employee)
+                .role("USER")
                 .build());
 
         return ResponseEntity.ok(employeeDto);
@@ -126,7 +130,7 @@ public class EmployeeController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AccountCredentials accountCredentials) {
         UsernamePasswordAuthenticationToken creds = new
-                UsernamePasswordAuthenticationToken(accountCredentials.username(),
+                UsernamePasswordAuthenticationToken(accountCredentials.account(),
                 accountCredentials.password());
         Authentication auth = authenticationManager.authenticate(creds);
         // Generate token

@@ -1,4 +1,4 @@
 package tayduong.com.employeebe.dto;
 
-public record AccountCredentials(String username, String password) {
+public record AccountCredentials(String account, String password) {
 }

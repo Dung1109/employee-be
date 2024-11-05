@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
 
@@ -19,13 +20,12 @@ public class JwtService {
 
     static final String PREFIX = "Bearer";
 
-    static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    static final SecretKey key = Jwts.SIG.HS256.key().build();
+
 
     // Generate signed JWT token
     public String getToken(String username) {
-        String token = Jwts.builder()
-                .setSubject(username)
-                .setExpiration(new Date(System.currentTimeMillis() +
+        String token = Jwts.builder().subject(username).expiration(new Date(System.currentTimeMillis() +
                         EXPIRATIONTIME)).signWith(key)
                 .compact();
         return token;
@@ -38,10 +38,9 @@ public class JwtService {
                 (HttpHeaders.AUTHORIZATION);
         if (token != null) {
             String user = Jwts.parser()
-                    .setSigningKey(key)
+                    .verifyWith(key)
                     .build()
-                    .parseSignedClaims(token.replace(PREFIX, ""))
-                    .getBody()
+                    .parseSignedClaims(token.replace(PREFIX, "")).getPayload()
                     .getSubject();
             return user;
         }
