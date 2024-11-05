@@ -4,9 +4,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import tayduong.com.employeebe.dto.AccountCredentials;
 import tayduong.com.employeebe.dto.EmployeeDto;
 import tayduong.com.employeebe.entities.Account;
 import tayduong.com.employeebe.entities.Employee;
@@ -15,6 +20,7 @@ import tayduong.com.employeebe.mapper.EmployeeMapper;
 import tayduong.com.employeebe.repo.AccountRepository;
 import tayduong.com.employeebe.repo.EmployeeRepository;
 import tayduong.com.employeebe.service.ImageService;
+import tayduong.com.employeebe.service.JwtService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,19 +28,23 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/employee")
-@CrossOrigin(origins = "http://localhost:3000")
+//@CrossOrigin(origins = "http://localhost:3000")
 public class EmployeeController {
     private final EmployeeMapper employeeMapper;
     private final EmployeeRepository employeeRepository;
     private final AccountRepository accountRepository;
     private final ImageService imageService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     public EmployeeController(EmployeeMapper employeeMapper, EmployeeRepository employeeRepository,
-                              AccountRepository accountRepository, ImageService imageService) {
+                              AccountRepository accountRepository, ImageService imageService, AuthenticationManager authenticationManager, JwtService jwtService) {
         this.employeeMapper = employeeMapper;
         this.employeeRepository = employeeRepository;
         this.accountRepository = accountRepository;
         this.imageService = imageService;
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
     }
 
     @GetMapping("/test/employee")
@@ -111,5 +121,20 @@ public class EmployeeController {
     public ResponseEntity<List<Image>> getUserImages(@PathVariable String userId) {
         List<Image> images = imageService.getUserImages(userId);
         return ResponseEntity.ok(images);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody AccountCredentials accountCredentials) {
+        UsernamePasswordAuthenticationToken creds = new
+                UsernamePasswordAuthenticationToken(accountCredentials.username(),
+                accountCredentials.password());
+        Authentication auth = authenticationManager.authenticate(creds);
+        // Generate token
+        String jwts = jwtService.getToken(auth.getName());
+        // Build response with the generated token
+        return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION,
+                "Bearer" + jwts).header(HttpHeaders.
+                        ACCESS_CONTROL_EXPOSE_HEADERS,
+                "Authorization").build();
     }
 }
