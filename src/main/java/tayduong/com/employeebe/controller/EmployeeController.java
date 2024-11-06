@@ -90,6 +90,8 @@ public class EmployeeController {
             response.put("filterBy", filterBy);
             response.put("filterValue", filterValue);
 
+            System.out.println(response);
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
