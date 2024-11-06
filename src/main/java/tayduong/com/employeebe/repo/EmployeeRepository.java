@@ -16,4 +16,11 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
 
     @Query("SELECT new tayduong.com.employeebe.dto.EmployeeDto(e.id, e.firstName, e.lastName, e.gender, e.dateOfBirth, e.phone, e.address, e.departmentName, e.remark, null, null, null , null ) FROM Employee e ")
     Page<EmployeeDto> findAllEmployeesWithPagination(Pageable pageable);
+
+    @Query("SELECT e FROM Employee e WHERE " +
+            "CASE WHEN :filterBy = 'fullName' THEN LOWER(CONCAT(e.firstName, ' ', e.lastName)) LIKE LOWER(CONCAT('%', :filterValue, '%')) " +
+            "     WHEN :filterBy = 'address' THEN LOWER(e.address) LIKE LOWER(CONCAT('%', :filterValue, '%')) " +
+            "     WHEN :filterBy = 'department' THEN LOWER(e.departmentName) LIKE LOWER(CONCAT('%', :filterValue, '%')) " +
+            "     ELSE 1=1 END")
+    Page<EmployeeDto> findEmployeesWithFilter(String filterBy, String filterValue, Pageable pageable);
 }

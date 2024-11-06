@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -66,20 +67,35 @@ public class EmployeeController {
     public ResponseEntity<Map<String, Object>> getEmployee(
             @RequestParam(defaultValue = "0") Integer pageNo,
             @RequestParam(defaultValue = "10") Integer pageSize,
-            @RequestParam(defaultValue = "id") String sortBy
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "") String filterBy,
+            @RequestParam(defaultValue = "") String filterValue
     ) {
+        try {
+            Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+            Page<EmployeeDto> pagedResult;
 
-        Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
-        Page<EmployeeDto> pagedResult = employeeRepository.findAllEmployeesWithPagination(paging);
+            if (filterBy.isEmpty() || filterValue.isEmpty()) {
+                pagedResult = employeeRepository.findAllEmployeesWithPagination(paging);
+            } else {
+                pagedResult = employeeRepository.findEmployeesWithFilter(filterBy, filterValue, paging);
+            }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("employees", pagedResult.getContent());
-        response.put("currentPage", pagedResult.getNumber());
-        response.put("totalItems", pagedResult.getTotalElements());
-        response.put("totalPages", pagedResult.getTotalPages());
-        response.put("currentSort", sortBy);
+            Map<String, Object> response = new HashMap<>();
+            response.put("employees", pagedResult.getContent());
+            response.put("currentPage", pagedResult.getNumber());
+            response.put("totalItems", pagedResult.getTotalElements());
+            response.put("totalPages", pagedResult.getTotalPages());
+            response.put("currentSort", sortBy);
+            response.put("filterBy", filterBy);
+            response.put("filterValue", filterValue);
 
-        return ResponseEntity.ok(response);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to fetch employees: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 
     @PostMapping("/")
