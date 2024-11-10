@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import tayduong.com.employeebe.enums.Gender;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @Entity
@@ -13,7 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 @ToString
-public class Employee {
+public class Employee implements Serializable {
 
     @Id
     @Column(name = "employee_id")

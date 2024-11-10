@@ -35,5 +35,6 @@ public class Account  {
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
+    @Builder.Default
     private String role = "USER";
 }

@@ -1,5 +1,7 @@
 package tayduong.com.employeebe.controller;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +23,7 @@ import tayduong.com.employeebe.entities.Image;
 import tayduong.com.employeebe.mapper.EmployeeMapper;
 import tayduong.com.employeebe.repo.AccountRepository;
 import tayduong.com.employeebe.repo.EmployeeRepository;
+import tayduong.com.employeebe.service.EmployeeService;
 import tayduong.com.employeebe.service.ImageService;
 import tayduong.com.employeebe.service.JwtService;
 
@@ -30,25 +33,30 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/employee")
+@Slf4j
 //@CrossOrigin(origins = "http://localhost:3000")
 public class EmployeeController {
     private final EmployeeMapper employeeMapper;
     private final EmployeeRepository employeeRepository;
     private final AccountRepository accountRepository;
-    private final ImageService imageService;
+    //    private final ImageService imageService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final EmployeeService employeeService;
+    private final ImageService imageService;
 
-    public EmployeeController(EmployeeMapper employeeMapper, EmployeeRepository employeeRepository,
-                              AccountRepository accountRepository, ImageService imageService, AuthenticationManager authenticationManager, JwtService jwtService, PasswordEncoder passwordEncoder) {
+
+    public EmployeeController(EmployeeMapper employeeMapper, EmployeeRepository employeeRepository, AccountRepository accountRepository, /*ImageService imageService,*/ AuthenticationManager authenticationManager, JwtService jwtService, PasswordEncoder passwordEncoder, EmployeeService employeeService, ImageService imageService) {
         this.employeeMapper = employeeMapper;
         this.employeeRepository = employeeRepository;
         this.accountRepository = accountRepository;
-        this.imageService = imageService;
+//        this.imageService = imageService;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
+        this.employeeService = employeeService;
+        this.imageService = imageService;
     }
 
     @GetMapping("/test/employee")
@@ -58,9 +66,7 @@ public class EmployeeController {
 
     @GetMapping("/{id}")
     public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable Integer id) {
-        return employeeRepository.findByEmployeeId(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return employeeRepository.findByEmployeeId(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/")
@@ -69,31 +75,13 @@ public class EmployeeController {
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "") String filterBy,
-            @RequestParam(defaultValue = "") String filterValue
-    ) {
+            @RequestParam(defaultValue = "") String filterValue) {
         try {
-            Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
-            Page<EmployeeDto> pagedResult;
-
-            if (filterBy.isEmpty() || filterValue.isEmpty()) {
-                pagedResult = employeeRepository.findAllEmployeesWithPagination(paging);
-            } else {
-                pagedResult = employeeRepository.findEmployeesWithFilter(filterBy, filterValue, paging);
-            }
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("employees", pagedResult.getContent());
-            response.put("currentPage", pagedResult.getNumber());
-            response.put("totalItems", pagedResult.getTotalElements());
-            response.put("totalPages", pagedResult.getTotalPages());
-            response.put("currentSort", sortBy);
-            response.put("filterBy", filterBy);
-            response.put("filterValue", filterValue);
-
-            System.out.println(response);
-
+            Map<String, Object> response = employeeService.getEmployeeData(
+                    pageNo, pageSize, sortBy, filterBy, filterValue);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            log.error("Error fetching employees", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", "Failed to fetch employees: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
@@ -103,15 +91,8 @@ public class EmployeeController {
     @PostMapping("/")
     public ResponseEntity<EmployeeDto> createEmployee(@RequestBody EmployeeDto employeeDto) {
         Employee employee = employeeRepository.save(employeeMapper.toEntity(employeeDto));
-        Account account = accountRepository.save(Account.builder()
-                .account(employeeDto.getAccount())
-                .email(employeeDto.getEmail())
-                .password(passwordEncoder.encode(employeeDto.getPassword()))
-                .status(employeeDto.getStatus())
-                .employee(employee)
-                .role("USER")
-                .build());
-
+        Account account = accountRepository.save(Account.builder().account(employeeDto.getAccount()).email(employeeDto.getEmail()).password(passwordEncoder.encode(employeeDto.getPassword())).status(employeeDto.getStatus()).employee(employee).role("USER").build());
+        employeeService.clearEmployeeCache();
         return ResponseEntity.ok(employeeDto);
     }
 
@@ -147,16 +128,11 @@ public class EmployeeController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AccountCredentials accountCredentials) {
-        UsernamePasswordAuthenticationToken creds = new
-                UsernamePasswordAuthenticationToken(accountCredentials.account(),
-                accountCredentials.password());
+        UsernamePasswordAuthenticationToken creds = new UsernamePasswordAuthenticationToken(accountCredentials.account(), accountCredentials.password());
         Authentication auth = authenticationManager.authenticate(creds);
         // Generate token
         String jwts = jwtService.getToken(auth.getName());
         // Build response with the generated token
-        return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION,
-                "Bearer" + jwts).header(HttpHeaders.
-                        ACCESS_CONTROL_EXPOSE_HEADERS,
-                "Authorization").build();
+        return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, "Bearer" + jwts).header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Authorization").build();
     }
 }

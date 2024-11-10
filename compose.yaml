@@ -6,18 +6,24 @@ services:
             - 'POSTGRES_PASSWORD=secret'
             - 'POSTGRES_USER=user'
         ports:
-            - '5432'
+            - '5431:5432'
 
-    app:
-        build:
-            context: .
-            dockerfile: Dockerfile
-        restart: always
+#    app:
+#        build:
+#            context: .
+#            dockerfile: Dockerfile
+#        restart: always
+#        ports:
+#            - '8080:8080'
+#        depends_on:
+#            - postgres
+#        environment:
+#            - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/tayduongdb'
+#            - 'SPRING_DATASOURCE_USERNAME=user'
+#            - 'SPRING_DATASOURCE_PASSWORD=secret'
+
+    redis:
+        image: 'redis:latest'
         ports:
-            - '8080:8080'
-        depends_on:
-            - postgres
-        environment:
-            - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/tayduongdb'
-            - 'SPRING_DATASOURCE_USERNAME=user'
-            - 'SPRING_DATASOURCE_PASSWORD=secret'
+            - '6379:6379'
+        command: redis-server --save 20 1 --loglevel warning
