@@ -9,6 +9,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,6 +28,7 @@ import tayduong.com.employeebe.repo.EmployeeRepository;
 import tayduong.com.employeebe.service.EmployeeService;
 import tayduong.com.employeebe.service.ImageService;
 import tayduong.com.employeebe.service.JwtService;
+import tayduong.com.employeebe.service.SecurityService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,9 +48,10 @@ public class EmployeeController {
     private final PasswordEncoder passwordEncoder;
     private final EmployeeService employeeService;
     private final ImageService imageService;
+    private final SecurityService securityService;
 
 
-    public EmployeeController(EmployeeMapper employeeMapper, EmployeeRepository employeeRepository, AccountRepository accountRepository, /*ImageService imageService,*/ AuthenticationManager authenticationManager, JwtService jwtService, PasswordEncoder passwordEncoder, EmployeeService employeeService, ImageService imageService) {
+    public EmployeeController(EmployeeMapper employeeMapper, EmployeeRepository employeeRepository, AccountRepository accountRepository, /*ImageService imageService,*/ AuthenticationManager authenticationManager, JwtService jwtService, PasswordEncoder passwordEncoder, EmployeeService employeeService, ImageService imageService, SecurityService securityService) {
         this.employeeMapper = employeeMapper;
         this.employeeRepository = employeeRepository;
         this.accountRepository = accountRepository;
@@ -57,6 +61,7 @@ public class EmployeeController {
         this.passwordEncoder = passwordEncoder;
         this.employeeService = employeeService;
         this.imageService = imageService;
+        this.securityService = securityService;
     }
 
     @GetMapping("/test/employee")
@@ -65,7 +70,10 @@ public class EmployeeController {
     }
 
     @GetMapping("/{id}")
+//    @PostAuthorize("@securityService.isEmployeeOwner(#id)")
     public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable Integer id) {
+        System.out.println("Attempting to access employee with ID: " + id);
+        System.out.println("Security check result: " + securityService.isEmployeeOwner(id));
         return employeeRepository.findByEmployeeId(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
