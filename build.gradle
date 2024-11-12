@@ -48,7 +48,7 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
     // Define Jackson version to ensure all components use the same version
-    def jacksonVersion = '2.17.2'
+    def jacksonVersion = '2.18.1'
 
     implementation "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
