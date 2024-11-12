@@ -1,8 +1,11 @@
 package tayduong.com.employeebe.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.EnumDeserializer;
+import com.fasterxml.jackson.databind.ser.std.EnumSerializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import jakarta.validation.constraints.Email;
@@ -31,9 +34,10 @@ public class EmployeeDto implements Serializable {
     @NotNull
     String firstName;
     String lastName;
+
     Gender gender;
 
-    @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
+    @JsonFormat(pattern = "yyyy-MM-dd")
     LocalDate dateOfBirth;
 
     String phone;

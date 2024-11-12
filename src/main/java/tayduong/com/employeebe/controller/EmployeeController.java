@@ -1,15 +1,9 @@
 package tayduong.com.employeebe.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -70,7 +64,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/{id}")
-//    @PostAuthorize("@securityService.isEmployeeOwner(#id)")
+    @PreAuthorize("@securityService.isEmployeeOwner(#id)")
     public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable Integer id) {
         System.out.println("Attempting to access employee with ID: " + id);
         System.out.println("Security check result: " + securityService.isEmployeeOwner(id));

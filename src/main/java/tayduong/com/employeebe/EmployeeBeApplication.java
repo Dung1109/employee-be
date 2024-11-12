@@ -12,6 +12,7 @@ import tayduong.com.employeebe.enums.Status;
 import tayduong.com.employeebe.repo.AccountRepository;
 import tayduong.com.employeebe.repo.EmployeeRepository;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @SpringBootApplication
@@ -24,7 +25,7 @@ public class EmployeeBeApplication {
     @Bean
     CommandLineRunner init(AccountRepository accountRepository, EmployeeRepository employeeRepository, PasswordEncoder passwordEncoder) {
         return (args) -> {
-            Employee emp = employeeRepository.save(Employee.builder().firstName("tayduong").lastName("tayduong").address("HN").remark("ADASD").build());
+            Employee emp = employeeRepository.save(Employee.builder().firstName("tayduong").lastName("tayduong").dateOfBirth(LocalDate.of(2021,10,2)).address("HN").remark("ADASD").build());
             accountRepository.save(Account.builder().account("admin123").password(passwordEncoder.encode("123456")).status(Status.ACTIVE).role("USER").employee(emp).build());
         };
     }

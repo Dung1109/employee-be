@@ -23,7 +23,7 @@ public class EmployeeService {
         this.employeeRepository = employeeRepository;
     }
 
-    @Cacheable(value = "employees", key = "#pageNo + '_' + #pageSize + '_' + #sortBy + '_' + #filterBy + '_' + #filterValue")
+    @Cacheable(value = "cache::employeeSets", key = "#pageNo + '_' + #pageSize + '_' + #sortBy + '_' + #filterBy + '_' + #filterValue")
     public Map<String, Object> getEmployeeData(Integer pageNo, Integer pageSize, String sortBy,
                                                String filterBy, String filterValue) {
         log.info("Fetching employee data from database with pageNo: {}, pageSize: {}, sortBy: {}, filterBy: {}, filterValue: {}",
@@ -51,7 +51,7 @@ public class EmployeeService {
     }
 
     // Add method to clear cache when needed
-    @CacheEvict(value = "employees", allEntries = true)
+    @CacheEvict(value = "cache::employeeSets", allEntries = true)
     public void clearEmployeeCache() {
         log.info("Clearing employee cache");
     }

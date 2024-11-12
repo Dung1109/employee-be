@@ -1,15 +1,25 @@
 package tayduong.com.employeebe.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import tayduong.com.employeebe.dto.EmployeeDto;
 import tayduong.com.employeebe.entities.Account;
 import tayduong.com.employeebe.entities.Employee;
+import tayduong.com.employeebe.repo.EmployeeRepository;
+
+import java.util.Optional;
 
 @Service
 @Slf4j
 public class SecurityService {
+    private final EmployeeRepository employeeRepository;
+
+    public SecurityService(EmployeeRepository employeeRepository) {
+        this.employeeRepository = employeeRepository;
+    }
 
 //    public boolean isEmployeeOwner(Integer employeeId) {
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -37,30 +47,27 @@ public class SecurityService {
             return false;
         }
 
-        Object principal = authentication.getClass();
-        log.error("Principal: {}", principal);
-        log.error("Principal class: {}", principal.toString());
+        Object principal = authentication.getPrincipal();
+        log.debug("Principal: {}", principal);
 
-        if (!(principal instanceof Account)) {
-            log.error("Principal is not an Account instance");
-            return false;
-        }
+        Optional<EmployeeDto> emp = employeeRepository.findByEmployeeId(employeeId);
+        log.debug("Principal class true?: {}", principal.toString().equals(emp.get().getAccount()));
 
-        Account account = (Account) principal;
-        log.error("Checking access for user: {}", account.getUsername());
-        log.error("User role: {}", account.getRole());
-        log.error("User's employee: {}", account.getEmployee());
+//        Account account = (Account) principal;
+//        log.error("Checking access for user: {}", account.getUsername());
+//        log.error("User role: {}", account.getRole());
+//        log.error("User's employee: {}", account.getEmployee());
 
-        if (account.getRole().equals("ADMIN")) {
-            log.error("User is admin, granting access");
+//        if (account.getRole().equals("ADMIN")) {
+//            log.error("User is admin, granting access");
+//            return true;
+//        }
+
+        if (principal.toString().equals(emp.get().getAccount())) {
+            log.debug("User is owner of the employee, granting access");
             return true;
         }
 
-        Employee employeeOfAccount = account.getEmployee();
-        boolean hasAccess = employeeOfAccount != null &&
-                employeeOfAccount.getId().equals(employeeId);
-
-        log.error("Access granted: {}", hasAccess);
-        return hasAccess;
+        return false;
     }
 }
