@@ -21,6 +21,7 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import tayduong.com.employeebe.dto.EmployeeDto;
+import tayduong.com.employeebe.entities.KhachHangDto;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -33,6 +34,7 @@ public class CacheConfig {
     private static final String CACHE_PREFIX = "cache::";
     private static final String EMPLOYEE_CACHE = "employees";
     private static final String EMPLOYEE_SET_CACHE = "employeeSets";
+    private static final String KHACH_HANG_CACHE = "khachHangs";
 
     @Bean
     public ObjectMapper objectMapper() {
@@ -69,6 +71,9 @@ public class CacheConfig {
         Jackson2JsonRedisSerializer<HashSet<EmployeeDto>> employeeSetSerializer =
                 new Jackson2JsonRedisSerializer<>(cacheObjectMapper.getTypeFactory().constructCollectionType(HashSet.class, EmployeeDto.class));
 
+        Jackson2JsonRedisSerializer<KhachHangDto> khachHangSerializer =
+                new Jackson2JsonRedisSerializer<>(cacheObjectMapper, KhachHangDto.class);
+
         return builder -> builder
                 // Default cache configuration
                 .cacheDefaults(RedisCacheConfiguration.defaultCacheConfig()
@@ -83,7 +88,11 @@ public class CacheConfig {
                 .withCacheConfiguration(EMPLOYEE_SET_CACHE, RedisCacheConfiguration.defaultCacheConfig()
                         .prefixCacheNameWith(CACHE_PREFIX)
                         .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(employeeSetSerializer))
-                        .entryTtl(Duration.ofHours(1)));
+                        .entryTtl(Duration.ofHours(1)))
+                .withCacheConfiguration(KHACH_HANG_CACHE, RedisCacheConfiguration.defaultCacheConfig()
+                        .prefixCacheNameWith(CACHE_PREFIX)
+                        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(khachHangSerializer))
+                        .entryTtl(Duration.ofDays(1)));
     }
 
     @Bean

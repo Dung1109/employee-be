@@ -1,6 +1,10 @@
 DROP TABLE IF EXISTS account;
 DROP TABLE IF EXISTS employee;
 DROP TABLE IF EXISTS images;
+DROP TABLE IF EXISTS chi_tiet_don_hang;
+DROP TABLE IF EXISTS don_hang;
+DROP TABLE IF EXISTS khach_hang;
+DROP TABLE IF EXISTS san_pham;
 
 CREATE TABLE account
 (
@@ -52,3 +56,52 @@ CREATE TABLE images
 
 ALTER TABLE account
     ADD role VARCHAR(255) DEFAULT 'USER';
+
+
+
+-- Tạo extension để sử dụng UUID nếu chưa có
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Bảng khách hàng
+CREATE TABLE khach_hang (
+                            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                            ma_khach_hang TEXT,
+                            ten_khach_hang TEXT,
+                            dia_chi TEXT,
+                            nhom_kh_ncc TEXT,
+                            ma_so_thue TEXT,
+                            dien_thoai TEXT,
+                            ngung_theo_doi BOOLEAN
+);
+
+-- Bảng sản phẩm
+CREATE TABLE san_pham (
+                          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                          ma_san_pham TEXT,
+                          ten_san_pham TEXT,
+                          don_vi TEXT,
+                          don_gia DECIMAL(18, 2)
+);
+
+-- Bảng đơn hàng
+CREATE TABLE don_hang (
+                          id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                          ma_don_hang TEXT,
+                          ma_khach_hang UUID REFERENCES khach_hang(id),
+                          ngay_dat DATE,
+                          ngay_thanh_toan DATE,
+                          dieu_khoan_tt TEXT,
+                          tong_tien DECIMAL(18, 2),
+                          tien_vat DECIMAL(18, 2),
+                          tong_thanh_toan DECIMAL(18, 2)
+);
+
+-- Bảng chi tiết đơn hàng
+CREATE TABLE chi_tiet_don_hang (
+                                   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                                   ma_don_hang UUID REFERENCES don_hang(id),
+                                   ma_san_pham UUID REFERENCES san_pham(id),
+                                   so_luong INT,
+                                   thanh_tien DECIMAL(18, 2)
+);
+

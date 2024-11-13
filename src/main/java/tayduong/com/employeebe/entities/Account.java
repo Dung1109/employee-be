@@ -2,6 +2,7 @@ package tayduong.com.employeebe.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,7 +18,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Account implements UserDetails  {
+public class Account implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -40,8 +41,8 @@ public class Account implements UserDetails  {
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
-    @Builder.Default
-    private String role = "USER";
+    @ColumnDefault("USER")
+    private String role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

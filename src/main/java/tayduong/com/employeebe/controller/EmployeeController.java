@@ -16,9 +16,12 @@ import tayduong.com.employeebe.dto.EmployeeDto;
 import tayduong.com.employeebe.entities.Account;
 import tayduong.com.employeebe.entities.Employee;
 import tayduong.com.employeebe.entities.Image;
+import tayduong.com.employeebe.entities.KhachHangDto;
 import tayduong.com.employeebe.mapper.EmployeeMapper;
+import tayduong.com.employeebe.mapper.KhachHangMapper;
 import tayduong.com.employeebe.repo.AccountRepository;
 import tayduong.com.employeebe.repo.EmployeeRepository;
+import tayduong.com.employeebe.repo.KhachHangRepository;
 import tayduong.com.employeebe.service.EmployeeService;
 import tayduong.com.employeebe.service.ImageService;
 import tayduong.com.employeebe.service.JwtService;
@@ -43,9 +46,11 @@ public class EmployeeController {
     private final EmployeeService employeeService;
     private final ImageService imageService;
     private final SecurityService securityService;
+    private final KhachHangRepository khachHangRepository;
+    private final KhachHangMapper khachHangMapper;
 
 
-    public EmployeeController(EmployeeMapper employeeMapper, EmployeeRepository employeeRepository, AccountRepository accountRepository, /*ImageService imageService,*/ AuthenticationManager authenticationManager, JwtService jwtService, PasswordEncoder passwordEncoder, EmployeeService employeeService, ImageService imageService, SecurityService securityService) {
+    public EmployeeController(EmployeeMapper employeeMapper, EmployeeRepository employeeRepository, AccountRepository accountRepository, /*ImageService imageService,*/ AuthenticationManager authenticationManager, JwtService jwtService, PasswordEncoder passwordEncoder, EmployeeService employeeService, ImageService imageService, SecurityService securityService, KhachHangRepository khachHangRepository, KhachHangMapper khachHangMapper) {
         this.employeeMapper = employeeMapper;
         this.employeeRepository = employeeRepository;
         this.accountRepository = accountRepository;
@@ -56,6 +61,8 @@ public class EmployeeController {
         this.employeeService = employeeService;
         this.imageService = imageService;
         this.securityService = securityService;
+        this.khachHangRepository = khachHangRepository;
+        this.khachHangMapper = khachHangMapper;
     }
 
     @GetMapping("/test/employee")
@@ -136,5 +143,10 @@ public class EmployeeController {
         String jwts = jwtService.getToken(auth.getName());
         // Build response with the generated token
         return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, "Bearer" + jwts).header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Authorization").build();
+    }
+
+    @GetMapping("/khach-hang")
+    public ResponseEntity<List<KhachHangDto>> getKhachHang() {
+        return ResponseEntity.ok(khachHangRepository.findAll().stream().map(khachHangMapper::toDto).toList());
     }
 }
